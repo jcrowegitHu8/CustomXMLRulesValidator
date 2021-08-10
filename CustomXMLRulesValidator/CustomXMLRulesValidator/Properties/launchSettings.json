@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CustomXMLRulesValidator": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\github\\CustomXMLRulesValidator\\CustomXMLRulesValidator\\Samples\\TestFile1.xml"
+    }
+  }
+}
