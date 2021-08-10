@@ -1,34 +1,38 @@
 ﻿using System;
 using System.Xml;
+using System.Xml.XPath;
 using Wmhelp.XPath2;
 
 namespace CustomXMLRulesValidator
 {
     class Program
     {
+        static string validFunctionPrefixes = "process_,generate_,fn_,rest_";
         static void Main(string[] args)
         {
             var file = args[0];
             Console.WriteLine($"Processing file '{args[0]}'");
 
-            var doc = new XmlDocument();
-            doc.Load(file);
+            var doc = new XPathDocument(file);
+            var xpathNav = doc.CreateNavigator();
 
-            AllPublishedFunctionsHaveVersionHistoryComments(doc);
+            AllPublishedFunctionsHaveVersionHistoryComments(xpathNav);
             Console.WriteLine($"Done");
 
         }
 
-        static void AllPublishedFunctionsHaveVersionHistoryComments(XmlDocument xDoc)
+        static void AllPublishedFunctionsHaveVersionHistoryComments(XPathNavigator xDoc)
         {
             var allPublishedfunctions = @"//publishedFunction";
-            var allFunctionNodes = xDoc.SelectNodes(allPublishedfunctions);
+            var allFunctionNodes = xDoc.Select(allPublishedfunctions);
             Console.WriteLine($"There are '{allFunctionNodes?.Count}' published functions");
-            foreach (XmlNode functionNode in allFunctionNodes)
+            foreach (XPathNavigator functionNode in allFunctionNodes)
             {
-                if(functionNode.Attributes["script"].Value.Contains("TFS 137422"))
+                if(!functionNode.GetAttribute("script","").Contains("TFS 137422"))
                 {
-                    Console.WriteLine($"There are '{functionNode.Attributes["name"].Value}' has a code comment.");
+                    var lineNumber =(IXmlLineInfo)functionNode != null ? ((IXmlLineInfo)functionNode).LineNumber : 0;
+                    Console.WriteLine($"The published function '{functionNode.GetAttribute("name","")}' at line {lineNumber} is missing a version history comment.");
+
                 }
             }
         }
